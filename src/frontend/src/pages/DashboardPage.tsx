@@ -82,10 +82,10 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
     }
   };
 
-  const toggleTask = async (index: number, completed: boolean) => {
+  const toggleTask = async (id: bigint, completed: boolean) => {
     if (!actor) return;
     try {
-      await actor.updateTask(BigInt(index), !completed);
+      await actor.updateTask(id, !completed);
       await Promise.all([refreshTasks(), refreshProfile()]);
     } catch {
       toast.error("Failed to update task");
@@ -221,12 +221,11 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
             ) : (
               <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                 {todayTasks.map((task, idx) => {
-                  const globalIdx = tasks.findIndex((t) => t === task);
                   const catColors =
                     CATEGORY_COLORS[task.category] ?? CATEGORY_COLORS.work;
                   return (
                     <motion.div
-                      key={`${task.title}-${String(task.dueDate)}`}
+                      key={String(task.id)}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       className="flex items-center gap-3 p-3 rounded-lg bg-muted/20 group"
@@ -234,7 +233,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
                     >
                       <button
                         type="button"
-                        onClick={() => toggleTask(globalIdx, task.completed)}
+                        onClick={() => toggleTask(task.id, task.completed)}
                         data-ocid={`dashboard.checkbox.${idx + 1}`}
                         className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-all ${
                           task.completed

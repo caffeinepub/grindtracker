@@ -54,6 +54,7 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    acceptFriendRequest(from: Principal): Promise<string>;
     addFocusSession(durationMinutes: bigint, xpEarned: bigint): Promise<FocusSession>;
     addTask(title: string, category: Category, priority: Priority, dueDate: bigint, xpReward: bigint): Promise<Task>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
@@ -61,10 +62,16 @@ export interface backendInterface {
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getFocusSessions(): Promise<Array<FocusSession>>;
+    getFriendRequests(): Promise<Array<Principal>>;
+    getFriends(): Promise<Array<Principal>>;
+    getFriendsLeaderboard(): Promise<Array<[Principal, UserProfile]>>;
     getLeaderboard(): Promise<Array<[Principal, UserProfile]>>;
-    getTasks(): Promise<Array<Task>>;
+    getTasks(): Promise<Array<[bigint, Task]>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    rejectFriendRequest(from: Principal): Promise<void>;
+    removeFriend(friend: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    sendFriendRequest(to: Principal): Promise<string>;
     updateTask(id: bigint, completed: boolean): Promise<Task>;
 }

@@ -57,7 +57,7 @@ export default function TasksPage() {
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("All");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [deletingIdx, setDeletingIdx] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<bigint | null>(null);
   const [form, setForm] = useState({
     title: "",
     category: "work" as keyof typeof Category,
@@ -101,10 +101,10 @@ export default function TasksPage() {
     }
   };
 
-  const toggleTask = async (index: number, completed: boolean) => {
+  const toggleTask = async (id: bigint, completed: boolean) => {
     if (!actor) return;
     try {
-      await actor.updateTask(BigInt(index), !completed);
+      await actor.updateTask(id, !completed);
       await Promise.all([refreshTasks(), refreshProfile()]);
       if (!completed) toast.success("Task completed! XP earned 🎉");
     } catch {
@@ -112,17 +112,17 @@ export default function TasksPage() {
     }
   };
 
-  const deleteTask = async (index: number) => {
+  const deleteTask = async (id: bigint) => {
     if (!actor) return;
-    setDeletingIdx(index);
+    setDeletingId(id);
     try {
-      await actor.deleteTask(BigInt(index));
+      await actor.deleteTask(id);
       await refreshTasks();
       toast.success("Task deleted");
     } catch {
       toast.error("Failed to delete task");
     } finally {
-      setDeletingIdx(null);
+      setDeletingId(null);
     }
   };
 
@@ -333,12 +333,11 @@ export default function TasksPage() {
           <AnimatePresence>
             <div className="space-y-3">
               {filtered.map((task, idx) => {
-                const globalIdx = tasks.findIndex((t) => t === task);
                 const catColors =
                   CATEGORY_COLORS[task.category] ?? CATEGORY_COLORS.work;
                 return (
                   <motion.div
-                    key={`${task.title}-${String(task.dueDate)}`}
+                    key={String(task.id)}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -30 }}
@@ -348,7 +347,7 @@ export default function TasksPage() {
                   >
                     <button
                       type="button"
-                      onClick={() => toggleTask(globalIdx, task.completed)}
+                      onClick={() => toggleTask(task.id, task.completed)}
                       data-ocid={`tasks.checkbox.${idx + 1}`}
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                         task.completed
@@ -393,12 +392,12 @@ export default function TasksPage() {
                       </span>
                       <button
                         type="button"
-                        onClick={() => deleteTask(globalIdx)}
-                        disabled={deletingIdx === globalIdx}
+                        onClick={() => deleteTask(task.id)}
+                        disabled={deletingId === task.id}
                         data-ocid={`tasks.delete_button.${idx + 1}`}
                         className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
                       >
-                        {deletingIdx === globalIdx ? (
+                        {deletingId === task.id ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         ) : (
                           <Trash2 className="w-3.5 h-3.5" />

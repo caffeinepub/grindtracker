@@ -1,37 +1,36 @@
 # GrindTracker
 
 ## Current State
-Fully built frontend with 6 pages (Landing, Dashboard, Tasks, Focus, Leaderboard, Insights). All data is hardcoded mock data from `mockData.ts`. There is no authentication, no real user accounts, and no data persistence. The backend is an empty actor.
+- Full-stack productivity app with Tasks, Dashboard, Focus, Leaderboard, Insights pages
+- Tasks stored in backend Map<Nat, Task> with incrementing IDs
+- Frontend uses array index as task ID (bug: ID mismatch causes update/delete to fail)
+- Leaderboard shows all users globally
+- Profile has username but no UI to change it after account creation
+- No friends system
 
 ## Requested Changes (Diff)
 
 ### Add
-- Internet Identity login via the `authorization` component
-- A dedicated Login/Auth page shown when user is not authenticated
-- Backend storage for per-user profile: username, XP, level, streak, tasks, focus sessions
-- Backend API: `getProfile`, `createProfile`, `updateProfile`, `getTasks`, `addTask`, `updateTask`, `deleteTask`, `getFocusSessions`, `addFocusSession`, `getLeaderboard`
-- On first login, auto-create a fresh personalized profile (no demo data)
-- Data syncs across devices via the backend (tied to Internet Identity principal)
+- Friends system: send friend request by Principal ID, accept/reject incoming requests, remove friends
+- Friends-only leaderboard tab on the Leaderboard page
+- "Rename Account" button accessible from Dashboard/Navigation so user can update username at any time
+- Backend: `getTasks` returns tasks with IDs as tuples `[(Nat, Task)]`
+- Backend: `sendFriendRequest`, `acceptFriendRequest`, `rejectFriendRequest`, `getFriends`, `getFriendRequests`, `getFriendsLeaderboard`, `removeFriend`
+- Backend: allow getting any user's profile for leaderboard/friend context
 
 ### Modify
-- App.tsx: Wrap with `InternetIdentityProvider`, guard all app pages behind auth, show login page if not logged in
-- LandingPage: Replace "Start Grinding" with a login/signup CTA that triggers Internet Identity
-- Dashboard, Tasks, Focus, Leaderboard, Insights: Load real data from backend instead of mockData
-- Navigation: Show logged-in user's name/avatar + logout button
-- After login, if no profile exists → create one and route to dashboard with empty (fresh) state
+- Fix task toggle and delete: use actual backend task ID (from tuple) instead of array index
+- Leaderboard page: add "Friends" tab alongside "Global" tab with friend-only rankings
+- Leaderboard page: add "Add Friend" button/flow so users can add friends by Principal ID
+- AppContext: update Task type to include `id: bigint` from backend tuples
 
 ### Remove
-- Hardcoded mock user ("Alex Chen") from all pages
-- Example/demo tasks, focus sessions from initial view after login
+- Nothing removed
 
 ## Implementation Plan
-1. Select `authorization` component
-2. Generate Motoko backend with user profile storage, tasks, focus sessions, leaderboard
-3. Update frontend:
-   - Wrap app with InternetIdentityProvider
-   - Add auth guard: unauthenticated → show landing/login, authenticated → show app
-   - Login button on landing page triggers II login
-   - After login: call `getProfile`, if none exists call `createProfile` with a fresh empty profile
-   - Wire Dashboard, Tasks, Focus pages to real backend data
-   - Leaderboard pulls from backend's global list
-   - Navigation shows real user info + logout
+1. Update `main.mo`: change `getTasks` to return `[(Nat, Task)]`, add full friends system
+2. Update `backend.d.ts` to reflect new API
+3. Update `AppContext` to handle `[bigint, Task]` tuples, expose `id` on tasks
+4. Fix `TasksPage` and `DashboardPage` to use `task.id` for updateTask/deleteTask
+5. Update `LeaderboardPage`: add Global/Friends tabs, add friend, friend requests UI
+6. Add rename account modal accessible from Navigation or Dashboard

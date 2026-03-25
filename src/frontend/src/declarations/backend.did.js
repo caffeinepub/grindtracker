@@ -57,6 +57,7 @@ export const UserProfile = IDL.Record({
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'acceptFriendRequest' : IDL.Func([IDL.Principal], [IDL.Text], []),
   'addFocusSession' : IDL.Func([IDL.Nat, IDL.Nat], [FocusSession], []),
   'addTask' : IDL.Func(
       [IDL.Text, Category, Priority, IDL.Int, IDL.Nat],
@@ -67,20 +68,30 @@ export const idlService = IDL.Service({
   'deleteTask' : IDL.Func([IDL.Nat], [], []),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-  'getFocusSessions' : IDL.Func([], [IDL.Vec(FocusSession)], []),
+  'getFocusSessions' : IDL.Func([], [IDL.Vec(FocusSession)], ['query']),
+  'getFriendRequests' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
+  'getFriends' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
+  'getFriendsLeaderboard' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Principal, UserProfile))],
+      ['query'],
+    ),
   'getLeaderboard' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(IDL.Principal, UserProfile))],
       ['query'],
     ),
-  'getTasks' : IDL.Func([], [IDL.Vec(Task)], []),
+  'getTasks' : IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Nat, Task))], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'rejectFriendRequest' : IDL.Func([IDL.Principal], [], []),
+  'removeFriend' : IDL.Func([IDL.Principal], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'sendFriendRequest' : IDL.Func([IDL.Principal], [IDL.Text], []),
   'updateTask' : IDL.Func([IDL.Nat, IDL.Bool], [Task], []),
 });
 
@@ -136,6 +147,7 @@ export const idlFactory = ({ IDL }) => {
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'acceptFriendRequest' : IDL.Func([IDL.Principal], [IDL.Text], []),
     'addFocusSession' : IDL.Func([IDL.Nat, IDL.Nat], [FocusSession], []),
     'addTask' : IDL.Func(
         [IDL.Text, Category, Priority, IDL.Int, IDL.Nat],
@@ -146,20 +158,30 @@ export const idlFactory = ({ IDL }) => {
     'deleteTask' : IDL.Func([IDL.Nat], [], []),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-    'getFocusSessions' : IDL.Func([], [IDL.Vec(FocusSession)], []),
+    'getFocusSessions' : IDL.Func([], [IDL.Vec(FocusSession)], ['query']),
+    'getFriendRequests' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
+    'getFriends' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
+    'getFriendsLeaderboard' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Principal, UserProfile))],
+        ['query'],
+      ),
     'getLeaderboard' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Principal, UserProfile))],
         ['query'],
       ),
-    'getTasks' : IDL.Func([], [IDL.Vec(Task)], []),
+    'getTasks' : IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Nat, Task))], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'rejectFriendRequest' : IDL.Func([IDL.Principal], [], []),
+    'removeFriend' : IDL.Func([IDL.Principal], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'sendFriendRequest' : IDL.Func([IDL.Principal], [IDL.Text], []),
     'updateTask' : IDL.Func([IDL.Nat, IDL.Bool], [Task], []),
   });
 };

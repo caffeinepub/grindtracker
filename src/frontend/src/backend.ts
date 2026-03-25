@@ -137,6 +137,7 @@ export enum UserRole {
 }
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
+    acceptFriendRequest(from: Principal): Promise<string>;
     addFocusSession(durationMinutes: bigint, xpEarned: bigint): Promise<FocusSession>;
     addTask(title: string, category: Category, priority: Priority, dueDate: bigint, xpReward: bigint): Promise<Task>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
@@ -144,11 +145,17 @@ export interface backendInterface {
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getFocusSessions(): Promise<Array<FocusSession>>;
+    getFriendRequests(): Promise<Array<Principal>>;
+    getFriends(): Promise<Array<Principal>>;
+    getFriendsLeaderboard(): Promise<Array<[Principal, UserProfile]>>;
     getLeaderboard(): Promise<Array<[Principal, UserProfile]>>;
-    getTasks(): Promise<Array<Task>>;
+    getTasks(): Promise<Array<[bigint, Task]>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    rejectFriendRequest(from: Principal): Promise<void>;
+    removeFriend(friend: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    sendFriendRequest(to: Principal): Promise<string>;
     updateTask(id: bigint, completed: boolean): Promise<Task>;
 }
 import type { Category as _Category, Priority as _Priority, Task as _Task, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
@@ -165,6 +172,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor._initializeAccessControlWithSecret(arg0);
+            return result;
+        }
+    }
+    async acceptFriendRequest(arg0: Principal): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.acceptFriendRequest(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.acceptFriendRequest(arg0);
             return result;
         }
     }
@@ -266,6 +287,48 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getFriendRequests(): Promise<Array<Principal>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getFriendRequests();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getFriendRequests();
+            return result;
+        }
+    }
+    async getFriends(): Promise<Array<Principal>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getFriends();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getFriends();
+            return result;
+        }
+    }
+    async getFriendsLeaderboard(): Promise<Array<[Principal, UserProfile]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getFriendsLeaderboard();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getFriendsLeaderboard();
+            return result;
+        }
+    }
     async getLeaderboard(): Promise<Array<[Principal, UserProfile]>> {
         if (this.processError) {
             try {
@@ -280,7 +343,7 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getTasks(): Promise<Array<Task>> {
+    async getTasks(): Promise<Array<[bigint, Task]>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getTasks();
@@ -322,6 +385,34 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async rejectFriendRequest(arg0: Principal): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.rejectFriendRequest(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.rejectFriendRequest(arg0);
+            return result;
+        }
+    }
+    async removeFriend(arg0: Principal): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.removeFriend(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.removeFriend(arg0);
+            return result;
+        }
+    }
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
         if (this.processError) {
             try {
@@ -333,6 +424,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.saveCallerUserProfile(arg0);
+            return result;
+        }
+    }
+    async sendFriendRequest(arg0: Principal): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.sendFriendRequest(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.sendFriendRequest(arg0);
             return result;
         }
     }
@@ -390,6 +495,12 @@ function from_candid_record_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint
         priority: from_candid_Priority_n9(_uploadFile, _downloadFile, value.priority)
     };
 }
+function from_candid_tuple_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [bigint, _Task]): [bigint, Task] {
+    return [
+        value[0],
+        from_candid_Task_n5(_uploadFile, _downloadFile, value[1])
+    ];
+}
 function from_candid_variant_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     low: null;
 } | {
@@ -421,8 +532,8 @@ function from_candid_variant_n8(_uploadFile: (file: ExternalBlob) => Promise<Uin
 }): Category {
     return "social" in value ? Category.social : "learning" in value ? Category.learning : "work" in value ? Category.work : "personal" in value ? Category.personal : "health" in value ? Category.health : value;
 }
-function from_candid_vec_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Task>): Array<Task> {
-    return value.map((x)=>from_candid_Task_n5(_uploadFile, _downloadFile, x));
+function from_candid_vec_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<[bigint, _Task]>): Array<[bigint, Task]> {
+    return value.map((x)=>from_candid_tuple_n17(_uploadFile, _downloadFile, x));
 }
 function to_candid_Category_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Category): _Category {
     return to_candid_variant_n2(_uploadFile, _downloadFile, value);

@@ -52,6 +52,7 @@ export type UserRole = { 'admin' : null } |
   { 'guest' : null };
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'acceptFriendRequest' : ActorMethod<[Principal], string>,
   'addFocusSession' : ActorMethod<[bigint, bigint], FocusSession>,
   'addTask' : ActorMethod<[string, Category, Priority, bigint, bigint], Task>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
@@ -59,11 +60,17 @@ export interface _SERVICE {
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getFocusSessions' : ActorMethod<[], Array<FocusSession>>,
+  'getFriendRequests' : ActorMethod<[], Array<Principal>>,
+  'getFriends' : ActorMethod<[], Array<Principal>>,
+  'getFriendsLeaderboard' : ActorMethod<[], Array<[Principal, UserProfile]>>,
   'getLeaderboard' : ActorMethod<[], Array<[Principal, UserProfile]>>,
-  'getTasks' : ActorMethod<[], Array<Task>>,
+  'getTasks' : ActorMethod<[], Array<[bigint, Task]>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'rejectFriendRequest' : ActorMethod<[Principal], undefined>,
+  'removeFriend' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'sendFriendRequest' : ActorMethod<[Principal], string>,
   'updateTask' : ActorMethod<[bigint, boolean], Task>,
 }
 export declare const idlService: IDL.ServiceClass;

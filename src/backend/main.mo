@@ -9,11 +9,19 @@ import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Auth "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
-import Migration "migration";
+
 import Float "mo:core/Float";
 
-(with migration = Migration.run)
 actor {
+  func containsPrincipal(list : [Principal], value : Principal) : Bool {
+    for (item in list.values()) {
+      if (item == value) {
+        return true;
+      };
+    };
+    false;
+  };
+
   module Profile {
     public type RadarScores = {
       work : Float;
@@ -59,14 +67,19 @@ actor {
     xpEarned : Nat;
   };
 
-  // Initialize the user system state
-  let accessControlState = Auth.initState();
-  include MixinAuthorization(accessControlState);
-
-  var nextTaskId = 1;
+  var nextTaskId = 1 : Nat;
   let userProfiles = Map.empty<Principal, UserProfile>();
   let userTasks = Map.empty<Principal, Map.Map<Nat, Task>>();
   let focusSessions = Map.empty<Principal, [FocusSession]>();
+
+  let friendships = Map.empty<Principal, [Principal]>();
+  let friendRequestsSent = Map.empty<Principal, [Principal]>();
+  let friendRequestsReceived = Map.empty<Principal, [Principal]>();
+
+  // Initialize the user system state
+  let accessControlState = Auth.initState();
+  // Apply authentication mixin to automatically provide authentication and role-based access to all public functions
+  include MixinAuthorization(accessControlState);
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (Auth.hasPermission(accessControlState, caller, #user))) {
@@ -75,10 +88,8 @@ actor {
     userProfiles.get(caller);
   };
 
+  // Now public, not admin-only so everyone can fetch profiles by principal
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user and not Auth.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Can only view your own profile");
-    };
     userProfiles.get(user);
   };
 
@@ -89,7 +100,7 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  public shared ({ caller }) func getTasks() : async [Task] {
+  public query ({ caller }) func getTasks() : async [(Nat, Task)] {
     if (not (Auth.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access tasks");
     };
@@ -97,7 +108,7 @@ actor {
     switch (tasks) {
       case (null) { [] };
       case (?tasksMap) {
-        tasksMap.values().toArray();
+        tasksMap.toArray();
       };
     };
   };
@@ -165,7 +176,7 @@ actor {
     };
   };
 
-  public shared ({ caller }) func getFocusSessions() : async [FocusSession] {
+  public query ({ caller }) func getFocusSessions() : async [FocusSession] {
     if (not (Auth.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access focus sessions");
     };
@@ -209,5 +220,164 @@ actor {
     );
     sorted.sliceToArray(0, Nat.min(20, sorted.size()));
   };
-};
 
+  // FRIENDS SYSTEM
+
+  public shared ({ caller }) func sendFriendRequest(to : Principal) : async Text {
+    if (not (Auth.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Only users can send friend requests");
+    };
+    if (caller == to) {
+      Runtime.trap("Cannot send friend request to yourself");
+    };
+
+    switch (friendships.get(caller)) {
+      case (?friends) {
+        if (containsPrincipal(friends, to)) {
+          return "already_friends";
+        };
+      };
+      case (null) {};
+    };
+
+    switch (friendRequestsSent.get(caller)) {
+      case (?sent) {
+        if (containsPrincipal(sent, to)) {
+          return "already_sent";
+        };
+      };
+      case (null) {};
+    };
+
+    let callerSent = switch (friendRequestsSent.get(caller)) {
+      case (?sent) { sent.concat([to]) };
+      case (null) { [to] };
+    };
+    friendRequestsSent.add(caller, callerSent);
+
+    let toReceived = switch (friendRequestsReceived.get(to)) {
+      case (?received) { received.concat([caller]) };
+      case (null) { [caller] };
+    };
+    friendRequestsReceived.add(to, toReceived);
+
+    "sent";
+  };
+
+  public shared ({ caller }) func acceptFriendRequest(from : Principal) : async Text {
+    if (not (Auth.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Only users can accept friend requests");
+    };
+    let received = switch (friendRequestsReceived.get(caller)) {
+      case (?rec) { rec };
+      case (null) { Runtime.trap("No friend requests received") };
+    };
+
+    if (not containsPrincipal(received, from)) {
+      return "not_found";
+    };
+
+    friendRequestsReceived.add(caller, received.filter(func(p) { p != from }));
+
+    switch (friendRequestsSent.get(from)) {
+      case (?sent) {
+        friendRequestsSent.add(from, sent.filter(func(p) { p != caller }));
+      };
+      case (null) {};
+    };
+
+    let callerFriends = switch (friendships.get(caller)) {
+      case (?friends) { friends.concat([from]) };
+      case (null) { [from] };
+    };
+    friendships.add(caller, callerFriends);
+
+    let fromFriends = switch (friendships.get(from)) {
+      case (?friends) { friends.concat([caller]) };
+      case (null) { [caller] };
+    };
+    friendships.add(from, fromFriends);
+
+    "accepted";
+  };
+
+  public shared ({ caller }) func rejectFriendRequest(from : Principal) : async () {
+    if (not (Auth.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Only users can reject friend requests");
+    };
+    switch (friendRequestsReceived.get(caller)) {
+      case (?received) {
+        friendRequestsReceived.add(caller, received.filter(func(p) { p != from }));
+      };
+      case (null) {};
+    };
+    switch (friendRequestsSent.get(from)) {
+      case (?sent) {
+        friendRequestsSent.add(from, sent.filter(func(p) { p != caller }));
+      };
+      case (null) {};
+    };
+  };
+
+  public shared ({ caller }) func removeFriend(friend : Principal) : async () {
+    if (not (Auth.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Only users can remove friends");
+    };
+    switch (friendships.get(caller)) {
+      case (?friends) {
+        friendships.add(caller, friends.filter(func(p) { p != friend }));
+      };
+      case (null) {};
+    };
+    switch (friendships.get(friend)) {
+      case (?friends) {
+        friendships.add(friend, friends.filter(func(p) { p != caller }));
+      };
+      case (null) {};
+    };
+  };
+
+  public query ({ caller }) func getFriends() : async [Principal] {
+    if (not (Auth.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Only users can view friends");
+    };
+    switch (friendships.get(caller)) {
+      case (null) { [] };
+      case (?friends) { friends };
+    };
+  };
+
+  public query ({ caller }) func getFriendRequests() : async [Principal] {
+    if (not (Auth.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Only users can view friend requests");
+    };
+    switch (friendRequestsReceived.get(caller)) {
+      case (null) { [] };
+      case (?requests) { requests };
+    };
+  };
+
+  public query ({ caller }) func getFriendsLeaderboard() : async [(Principal, UserProfile)] {
+    if (not (Auth.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Only users can view friends leaderboard");
+    };
+    let friends = switch (friendships.get(caller)) {
+      case (null) { [] };
+      case (?friends) { friends };
+    };
+
+    let entries = friends.concat([caller]).filterMap(
+      func(p) {
+        switch (userProfiles.get(p)) {
+          case (null) { null };
+          case (?profile) { ?(p, profile) };
+        };
+      }
+    );
+    entries.sort(
+      func((p1, prof1), (p2, prof2)) {
+        Nat.compare(prof2.xp, prof1.xp)
+      }
+    );
+  };
+};

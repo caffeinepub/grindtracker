@@ -15,19 +15,20 @@ import {
 } from "../backend.d";
 import { useActor } from "../hooks/useActor";
 
+export type TaskWithId = Task & { id: bigint };
 export type { Task, UserProfile, FocusSession };
 export { Category, Priority };
 
 interface AppContextValue {
   profile: UserProfile | null;
-  tasks: Task[];
+  tasks: TaskWithId[];
   focusSessions: FocusSession[];
   isLoading: boolean;
   refreshProfile: () => Promise<void>;
   refreshTasks: () => Promise<void>;
   refreshSessions: () => Promise<void>;
   setProfile: (p: UserProfile) => void;
-  setTasks: (t: Task[]) => void;
+  setTasks: (t: TaskWithId[]) => void;
   setFocusSessions: (s: FocusSession[]) => void;
 }
 
@@ -42,7 +43,7 @@ export function useApp() {
 export function AppProvider({ children }: { children: ReactNode }) {
   const { actor, isFetching } = useActor();
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<TaskWithId[]>([]);
   const [focusSessions, setFocusSessions] = useState<FocusSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,8 +55,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const refreshTasks = useCallback(async () => {
     if (!actor) return;
-    const t = await actor.getTasks();
-    setTasks(t);
+    const tuples = await actor.getTasks();
+    setTasks(tuples.map(([id, task]) => ({ ...task, id })));
   }, [actor]);
 
   const refreshSessions = useCallback(async () => {
