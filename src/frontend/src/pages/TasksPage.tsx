@@ -127,18 +127,18 @@ export default function TasksPage() {
   };
 
   return (
-    <div className="max-w-[900px] mx-auto px-6 py-10">
+    <div className="max-w-[900px] mx-auto px-4 sm:px-6 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="font-display font-bold text-3xl mb-1">
+            <h1 className="font-display font-bold text-2xl sm:text-3xl mb-1">
               My <span className="gradient-text">Tasks</span>
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {tasks.length} tasks total ·{" "}
               {tasks.filter((t) => t.completed).length} completed
             </p>
@@ -149,12 +149,13 @@ export default function TasksPage() {
                 className="gradient-btn text-background font-semibold"
                 data-ocid="tasks.open_modal_button"
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Task
+                <Plus className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Add Task</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             </DialogTrigger>
             <DialogContent
-              className="bg-card border-border"
+              className="bg-card border-border w-full max-w-[calc(100vw-2rem)] sm:max-w-lg mx-4"
               data-ocid="tasks.dialog"
             >
               <DialogHeader>
@@ -266,17 +267,17 @@ export default function TasksPage() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-3 mb-6">
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <div className="flex gap-1">
+        <div className="flex flex-wrap gap-2 sm:gap-3 mb-6">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
+            <div className="flex flex-wrap gap-1">
               {CATEGORIES.map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setCategoryFilter(c)}
                   data-ocid="tasks.tab"
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
                     categoryFilter === c
                       ? "bg-primary text-background"
                       : "bg-muted/40 text-muted-foreground hover:text-foreground"
@@ -287,14 +288,14 @@ export default function TasksPage() {
               ))}
             </div>
           </div>
-          <div className="flex gap-1">
+          <div className="flex flex-wrap gap-1">
             {PRIORITIES.map((p) => (
               <button
                 key={p}
                 type="button"
                 onClick={() => setPriorityFilter(p)}
                 data-ocid="tasks.tab"
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
                   priorityFilter === p
                     ? "bg-accent text-background"
                     : "bg-muted/40 text-muted-foreground hover:text-foreground"
@@ -342,7 +343,7 @@ export default function TasksPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -30 }}
                     transition={{ duration: 0.2, delay: idx * 0.03 }}
-                    className="card-surface rounded-xl p-4 flex items-center gap-4 group"
+                    className="card-surface rounded-xl p-4 flex items-center gap-3 group"
                     data-ocid={`tasks.item.${idx + 1}`}
                   >
                     <button
@@ -361,7 +362,11 @@ export default function TasksPage() {
                     </button>
                     <div className="flex-1 min-w-0">
                       <p
-                        className={`font-medium text-sm truncate ${task.completed ? "line-through text-muted-foreground" : ""}`}
+                        className={`font-medium text-sm truncate ${
+                          task.completed
+                            ? "line-through text-muted-foreground"
+                            : ""
+                        }`}
                       >
                         {task.title}
                       </p>
@@ -369,9 +374,9 @@ export default function TasksPage() {
                         {new Date(Number(task.dueDate)).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                       <Badge
-                        className="text-xs border-0"
+                        className="text-xs border-0 hidden sm:flex"
                         style={{
                           background: catColors.bg,
                           color: catColors.text,
@@ -380,7 +385,7 @@ export default function TasksPage() {
                         {task.category}
                       </Badge>
                       <span
-                        className={`text-xs font-medium ${
+                        className={`text-xs font-medium hidden sm:block ${
                           PRIORITY_COLORS[task.priority] ??
                           "text-muted-foreground"
                         }`}
@@ -395,7 +400,7 @@ export default function TasksPage() {
                         onClick={() => deleteTask(task.id)}
                         disabled={deletingId === task.id}
                         data-ocid={`tasks.delete_button.${idx + 1}`}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all opacity-60 sm:opacity-0 sm:group-hover:opacity-100"
                       >
                         {deletingId === task.id ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />

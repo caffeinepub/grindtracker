@@ -25,8 +25,8 @@ import { useInternetIdentity } from "../hooks/useInternetIdentity";
 
 type TimeFilter = "week" | "month" | "alltime";
 const TIME_FILTERS: { label: string; value: TimeFilter }[] = [
-  { label: "This Week", value: "week" },
-  { label: "This Month", value: "month" },
+  { label: "Week", value: "week" },
+  { label: "Month", value: "month" },
   { label: "All Time", value: "alltime" },
 ];
 
@@ -105,7 +105,7 @@ function PodiumAndList({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8">
           {podiumOrder.map((entry, i) => {
             if (!entry) return <div key={podiumRanks[i]} />;
             const actualRank = podiumRanks[i];
@@ -116,30 +116,39 @@ function PodiumAndList({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className={`card-surface rounded-xl p-5 text-center border ${style.bg} ${
+                className={`card-surface rounded-xl p-2 sm:p-5 text-center border ${
+                  style.bg
+                } ${
                   i === 1 ? "scale-105" : ""
                 } ${entry.principal === myPrincipal ? "ring-2 ring-primary" : ""}`}
                 data-ocid={`leaderboard.item.${actualRank + 1}`}
               >
                 {i === 1 && (
-                  <Crown className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+                  <Crown className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-400 mx-auto mb-1 sm:mb-2" />
                 )}
-                <div className="text-3xl mb-2">{style.badge}</div>
-                <Avatar className="w-12 h-12 mx-auto mb-2">
-                  <AvatarFallback className="gradient-btn text-background font-bold">
+                <div className="text-xl sm:text-3xl mb-1 sm:mb-2">
+                  {style.badge}
+                </div>
+                <Avatar className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-1 sm:mb-2">
+                  <AvatarFallback className="gradient-btn text-background font-bold text-xs">
                     {entry.username.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <p className="font-semibold text-sm">{entry.username}</p>
+                <p className="font-semibold text-xs sm:text-sm truncate">
+                  {entry.username}
+                </p>
                 {entry.principal === myPrincipal && (
                   <Badge className="bg-primary/20 text-primary border-0 text-xs mt-1">
                     You
                   </Badge>
                 )}
-                <p className={`font-bold mt-1 ${style.color}`}>
-                  {entry.xp.toLocaleString()} XP
+                <p
+                  className={`font-bold mt-1 text-xs sm:text-sm ${style.color}`}
+                >
+                  {entry.xp.toLocaleString()}
+                  <span className="hidden sm:inline"> XP</span>
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground hidden sm:block">
                   {entry.streak}🔥
                 </p>
               </motion.div>
@@ -157,31 +166,33 @@ function PodiumAndList({
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.04 }}
-                className={`card-surface rounded-xl p-4 flex items-center gap-4 ${
+                className={`card-surface rounded-xl p-3 sm:p-4 flex items-center gap-3 ${
                   entry.principal === myPrincipal ? "ring-1 ring-primary" : ""
                 }`}
                 data-ocid="leaderboard.row"
               >
-                <span className="w-8 text-center text-sm font-bold text-muted-foreground">
+                <span className="w-7 text-center text-sm font-bold text-muted-foreground shrink-0">
                   {rank + 1}
                 </span>
-                <Avatar className="w-9 h-9">
+                <Avatar className="w-8 h-8 sm:w-9 sm:h-9 shrink-0">
                   <AvatarFallback className="gradient-btn text-background font-bold text-xs">
                     {entry.username.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{entry.username}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">
+                    {entry.username}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     Level {entry.level}
                   </p>
                 </div>
                 {entry.principal === myPrincipal && (
-                  <Badge className="bg-primary/20 text-primary border-0 text-xs">
+                  <Badge className="bg-primary/20 text-primary border-0 text-xs shrink-0">
                     You
                   </Badge>
                 )}
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <p className="font-bold text-sm text-primary">
                     {entry.xp.toLocaleString()} XP
                   </p>
@@ -242,7 +253,6 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
     enabled: !!actor && !isFetching,
   });
 
-  // Fetch profiles for friend requests
   const { data: requestProfiles } = useQuery<
     { principal: string; profile: UserProfile | null }[]
   >({
@@ -263,7 +273,6 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
     enabled: !!actor && !!friendRequests && friendRequests.length > 0,
   });
 
-  // Fetch profiles for friends
   const { data: friendProfiles } = useQuery<
     { principal: string; profile: UserProfile | null }[]
   >({
@@ -348,7 +357,7 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
   const leaderboardEntries = buildEntries(friendsLeaderboard ?? [], "alltime");
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Friends Leaderboard */}
       <section>
         <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
@@ -357,11 +366,11 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
         </h2>
         {loadingLeaderboard ? (
           <div
-            className="grid grid-cols-3 gap-4 mb-8"
+            className="grid grid-cols-3 gap-3 mb-8"
             data-ocid="leaderboard.loading_state"
           >
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-40 rounded-xl" />
+              <Skeleton key={i} className="h-36 rounded-xl" />
             ))}
           </div>
         ) : (
@@ -373,7 +382,7 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
       </section>
 
       {/* Add Friend */}
-      <section className="card-surface rounded-xl p-6">
+      <section className="card-surface rounded-xl p-4 sm:p-6">
         <h2 className="font-semibold mb-3 flex items-center gap-2">
           <UserPlus className="w-5 h-5 text-primary" />
           Add Friend
@@ -385,9 +394,9 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
           <Input
             value={addInput}
             onChange={(e) => setAddInput(e.target.value)}
-            placeholder="Principal ID (e.g. aaaaa-aa)"
+            placeholder="Principal ID..."
             data-ocid="leaderboard.input"
-            className="text-sm font-mono"
+            className="text-sm font-mono min-w-0"
             onKeyDown={(e) => e.key === "Enter" && sendRequest()}
           />
           <Button
@@ -401,11 +410,11 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
             ) : (
               <UserPlus className="w-4 h-4" />
             )}
-            <span className="ml-2 hidden sm:inline">Send Request</span>
+            <span className="ml-1 hidden sm:inline">Send</span>
           </Button>
         </div>
         {myPrincipal && (
-          <p className="text-xs text-muted-foreground mt-3">
+          <p className="text-xs text-muted-foreground mt-3 break-all">
             Your ID:{" "}
             <span className="font-mono text-primary">{myPrincipal}</span>
           </p>
@@ -450,10 +459,10 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="card-surface rounded-xl p-4 flex items-center gap-3"
+                className="card-surface rounded-xl p-3 sm:p-4 flex items-center gap-3"
                 data-ocid={`leaderboard.item.${idx + 1}`}
               >
-                <Avatar className="w-9 h-9">
+                <Avatar className="w-9 h-9 shrink-0">
                   <AvatarFallback className="gradient-btn text-background font-bold text-xs">
                     {(profile?.username ?? pStr).slice(0, 2).toUpperCase()}
                   </AvatarFallback>
@@ -470,7 +479,7 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
                   size="sm"
                   onClick={() => acceptRequest(pStr)}
                   disabled={acceptingPrincipal === pStr}
-                  className="gradient-btn text-background font-semibold"
+                  className="gradient-btn text-background font-semibold shrink-0 px-2 sm:px-3"
                   data-ocid="leaderboard.confirm_button"
                 >
                   {acceptingPrincipal === pStr ? (
@@ -478,17 +487,17 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
                   ) : (
                     <Check className="w-3 h-3" />
                   )}
-                  <span className="ml-1">Accept</span>
+                  <span className="ml-1 hidden sm:inline">Accept</span>
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => rejectRequest(pStr)}
-                  className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                  className="border-destructive/40 text-destructive hover:bg-destructive/10 shrink-0 px-2 sm:px-3"
                   data-ocid="leaderboard.cancel_button"
                 >
                   <X className="w-3 h-3" />
-                  <span className="ml-1">Reject</span>
+                  <span className="ml-1 hidden sm:inline">Reject</span>
                 </Button>
               </motion.div>
             ))}
@@ -533,10 +542,10 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="card-surface rounded-xl p-4 flex items-center gap-3"
+                className="card-surface rounded-xl p-3 sm:p-4 flex items-center gap-3"
                 data-ocid={`leaderboard.item.${idx + 1}`}
               >
-                <Avatar className="w-9 h-9">
+                <Avatar className="w-9 h-9 shrink-0">
                   <AvatarFallback className="gradient-btn text-background font-bold text-xs">
                     {(profile?.username ?? pStr).slice(0, 2).toUpperCase()}
                   </AvatarFallback>
@@ -555,7 +564,7 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
                   variant="outline"
                   onClick={() => removeFriend(pStr)}
                   disabled={removingPrincipal === pStr}
-                  className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                  className="border-destructive/40 text-destructive hover:bg-destructive/10 shrink-0 px-2 sm:px-3"
                   data-ocid={`leaderboard.delete_button.${idx + 1}`}
                 >
                   {removingPrincipal === pStr ? (
@@ -563,7 +572,7 @@ function FriendsTab({ myPrincipal }: { myPrincipal: string | undefined }) {
                   ) : (
                     <UserMinus className="w-3 h-3" />
                   )}
-                  <span className="ml-1">Remove</span>
+                  <span className="ml-1 hidden sm:inline">Remove</span>
                 </Button>
               </motion.div>
             ))}
@@ -594,27 +603,27 @@ export default function LeaderboardPage() {
   const displayData = buildEntries(leaderboard ?? [], timeFilter);
 
   return (
-    <div className="max-w-[900px] mx-auto px-6 py-10">
+    <div className="max-w-[900px] mx-auto px-4 sm:px-6 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full gradient-btn flex items-center justify-center glow-cyan">
-              <Trophy className="w-8 h-8 text-background" />
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full gradient-btn flex items-center justify-center glow-cyan">
+              <Trophy className="w-7 h-7 sm:w-8 sm:h-8 text-background" />
             </div>
           </div>
-          <h1 className="font-display font-bold text-3xl mb-2">
+          <h1 className="font-display font-bold text-2xl sm:text-3xl mb-2">
             <span className="gradient-text">Leaderboard</span>
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             The grind never stops. Are you at the top?
           </p>
         </div>
 
         <Tabs defaultValue="global">
-          <TabsList className="w-full mb-8 bg-card border border-border">
+          <TabsList className="w-full mb-6 bg-card border border-border">
             <TabsTrigger
               value="global"
               className="flex-1"
@@ -633,14 +642,14 @@ export default function LeaderboardPage() {
 
           <TabsContent value="global">
             {/* Time Filters */}
-            <div className="flex justify-center gap-2 mb-8">
+            <div className="flex justify-center gap-2 mb-6 sm:mb-8">
               {TIME_FILTERS.map((f) => (
                 <button
                   key={f.value}
                   type="button"
                   onClick={() => setTimeFilter(f.value)}
                   data-ocid="leaderboard.tab"
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  className={`px-3 sm:px-4 py-2 rounded-full text-sm font-medium transition-all ${
                     timeFilter === f.value
                       ? "gradient-btn text-background"
                       : "card-surface text-muted-foreground hover:text-foreground"
@@ -653,11 +662,11 @@ export default function LeaderboardPage() {
 
             {isLoading ? (
               <div
-                className="grid grid-cols-3 gap-4 mb-8"
+                className="grid grid-cols-3 gap-3 mb-8"
                 data-ocid="leaderboard.loading_state"
               >
                 {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-40 rounded-xl" />
+                  <Skeleton key={i} className="h-36 rounded-xl" />
                 ))}
               </div>
             ) : (

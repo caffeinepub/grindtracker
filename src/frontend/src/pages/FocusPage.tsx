@@ -80,23 +80,23 @@ export default function FocusPage() {
   );
 
   return (
-    <div className="max-w-[800px] mx-auto px-6 py-10">
+    <div className="max-w-[800px] mx-auto px-4 sm:px-6 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div className="text-center mb-10">
-          <h1 className="font-display font-bold text-3xl mb-2">
+        <div className="text-center mb-8">
+          <h1 className="font-display font-bold text-2xl sm:text-3xl mb-2">
             Focus <span className="gradient-text">Mode</span>
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             25-minute Pomodoro sessions. Earn XP for every completed session.
           </p>
         </div>
 
         {/* Timer circle */}
-        <div className="flex justify-center mb-10">
-          <div className="relative w-64 h-64">
+        <div className="flex justify-center mb-8 sm:mb-10">
+          <div className="relative w-52 h-52 sm:w-64 sm:h-64">
             <svg
               className="w-full h-full -rotate-90"
               viewBox="0 0 100 100"
@@ -124,7 +124,7 @@ export default function FocusPage() {
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="font-display font-bold text-5xl text-foreground">
+              <span className="font-display font-bold text-4xl sm:text-5xl text-foreground">
                 {String(minutes).padStart(2, "0")}:
                 {String(secs).padStart(2, "0")}
               </span>
@@ -148,7 +148,7 @@ export default function FocusPage() {
         </div>
 
         {/* Controls */}
-        <div className="flex justify-center gap-4 mb-12">
+        <div className="flex justify-center gap-4 mb-10">
           <Button
             variant="outline"
             size="icon"
@@ -177,7 +177,7 @@ export default function FocusPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {[
             {
               label: "Sessions",
@@ -200,17 +200,17 @@ export default function FocusPage() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="card-surface rounded-xl p-4 text-center"
+              className="card-surface rounded-xl p-3 sm:p-4 text-center"
             >
               <stat.icon className={`w-5 h-5 ${stat.color} mx-auto mb-2`} />
-              <p className="text-2xl font-bold">{stat.value}</p>
+              <p className="text-xl sm:text-2xl font-bold">{stat.value}</p>
               <p className="text-xs text-muted-foreground">{stat.label}</p>
             </div>
           ))}
         </div>
 
         {/* Recent Sessions */}
-        <div className="card-surface rounded-xl p-6">
+        <div className="card-surface rounded-xl p-4 sm:p-6">
           <h2 className="font-semibold mb-4">Recent Sessions</h2>
           {focusSessions.length === 0 ? (
             <div className="text-center py-8" data-ocid="focus.empty_state">
@@ -231,7 +231,7 @@ export default function FocusPage() {
                     data-ocid={`focus.item.${idx + 1}`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                         <Clock className="w-4 h-4 text-primary" />
                       </div>
                       <div>
@@ -243,7 +243,7 @@ export default function FocusPage() {
                         </p>
                       </div>
                     </div>
-                    <Badge className="bg-primary/10 text-primary border-0">
+                    <Badge className="bg-primary/10 text-primary border-0 shrink-0">
                       <Zap className="w-3 h-3 mr-1" />+{Number(s.xpEarned)} XP
                     </Badge>
                   </div>

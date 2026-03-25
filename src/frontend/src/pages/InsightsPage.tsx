@@ -28,7 +28,6 @@ const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export default function InsightsPage() {
   const { tasks, focusSessions } = useApp();
 
-  // Build last-7-days productivity data from real data
   const today = new Date();
   const weekData = Array.from({ length: 7 }, (_, i) => {
     const date = new Date(today);
@@ -67,7 +66,6 @@ export default function InsightsPage() {
   const totalFocus = weekData.reduce((s, d) => s + d.focusTime, 0);
   const totalXp = weekData.reduce((s, d) => s + d.xp, 0);
 
-  // Achievements derived from real data
   const allTasksCount = tasks.filter((t) => t.completed).length;
   const sessionsCount = focusSessions.length;
   const achievements = [
@@ -124,20 +122,20 @@ export default function InsightsPage() {
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
 
   return (
-    <div className="max-w-[1200px] mx-auto px-6 py-10">
+    <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="font-display font-bold text-3xl mb-2">
+        <h1 className="font-display font-bold text-2xl sm:text-3xl mb-2">
           Your <span className="gradient-text">Insights</span>
         </h1>
-        <p className="text-muted-foreground mb-8">
+        <p className="text-muted-foreground text-sm mb-6 sm:mb-8">
           7-day performance breakdown based on your real activity.
         </p>
 
         {/* Summary stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {[
             {
               label: "Tasks Done",
@@ -164,28 +162,31 @@ export default function InsightsPage() {
               color: "text-purple-400",
             },
           ].map((stat) => (
-            <div key={stat.label} className="card-surface rounded-xl p-5">
-              <stat.icon className={`w-5 h-5 ${stat.color} mb-3`} />
-              <p className="text-2xl font-bold">{stat.value}</p>
+            <div
+              key={stat.label}
+              className="card-surface rounded-xl p-4 sm:p-5"
+            >
+              <stat.icon className={`w-5 h-5 ${stat.color} mb-2 sm:mb-3`} />
+              <p className="text-xl sm:text-2xl font-bold">{stat.value}</p>
               <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6 sm:mb-8">
           {/* Tasks Chart */}
-          <div className="card-surface rounded-xl p-6">
+          <div className="card-surface rounded-xl p-4 sm:p-6 overflow-hidden">
             <h2 className="font-semibold mb-4">Daily Tasks Completed</h2>
             {totalTasks === 0 ? (
               <div
-                className="flex items-center justify-center h-48 text-muted-foreground text-sm"
+                className="flex items-center justify-center h-40 sm:h-48 text-muted-foreground text-sm"
                 data-ocid="insights.empty_state"
               >
                 Complete tasks to see your progress here!
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={weekData}>
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={weekData} margin={{ left: -20 }}>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="oklch(0.22 0.028 240)"
@@ -200,6 +201,7 @@ export default function InsightsPage() {
                     tick={{ fill: "oklch(0.6 0.02 240)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
+                    width={30}
                   />
                   <Tooltip {...tooltipStyle} />
                   <Bar
@@ -213,15 +215,15 @@ export default function InsightsPage() {
           </div>
 
           {/* Focus Chart */}
-          <div className="card-surface rounded-xl p-6">
+          <div className="card-surface rounded-xl p-4 sm:p-6 overflow-hidden">
             <h2 className="font-semibold mb-4">Focus Minutes / Day</h2>
             {totalFocus === 0 ? (
-              <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
+              <div className="flex items-center justify-center h-40 sm:h-48 text-muted-foreground text-sm">
                 Start focus sessions to see your data!
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={weekData}>
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart data={weekData} margin={{ left: -20 }}>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="oklch(0.22 0.028 240)"
@@ -236,6 +238,7 @@ export default function InsightsPage() {
                     tick={{ fill: "oklch(0.6 0.02 240)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
+                    width={30}
                   />
                   <Tooltip {...tooltipStyle} />
                   <Line
@@ -252,20 +255,20 @@ export default function InsightsPage() {
         </div>
 
         {/* Achievements */}
-        <div className="card-surface rounded-xl p-6">
-          <div className="flex items-center gap-2 mb-6">
+        <div className="card-surface rounded-xl p-4 sm:p-6">
+          <div className="flex items-center gap-2 mb-5">
             <Award className="w-5 h-5 text-purple-400" />
             <h2 className="font-semibold">Achievements</h2>
             <Badge className="bg-purple-400/10 text-purple-400 border-0 text-xs">
               {unlockedCount}/{achievements.length} Unlocked
             </Badge>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {achievements.map((a, idx) => (
               <div
                 key={a.title}
                 data-ocid={`insights.item.${idx + 1}`}
-                className={`flex items-center gap-3 p-4 rounded-xl border transition-all ${
+                className={`flex items-center gap-3 p-3 sm:p-4 rounded-xl border transition-all ${
                   a.unlocked
                     ? "border-primary/30 bg-primary/5"
                     : "border-border/30 bg-muted/10 opacity-50"
