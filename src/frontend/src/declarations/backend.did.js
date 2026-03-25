@@ -8,10 +8,160 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const idlService = IDL.Service({});
+export const FocusSession = IDL.Record({
+  'completedAt' : IDL.Int,
+  'durationMinutes' : IDL.Nat,
+  'xpEarned' : IDL.Nat,
+});
+export const Category = IDL.Variant({
+  'social' : IDL.Null,
+  'learning' : IDL.Null,
+  'work' : IDL.Null,
+  'personal' : IDL.Null,
+  'health' : IDL.Null,
+});
+export const Priority = IDL.Variant({
+  'low' : IDL.Null,
+  'high' : IDL.Null,
+  'medium' : IDL.Null,
+});
+export const Task = IDL.Record({
+  'title' : IDL.Text,
+  'xpReward' : IDL.Nat,
+  'completed' : IDL.Bool,
+  'dueDate' : IDL.Int,
+  'category' : Category,
+  'priority' : Priority,
+});
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
+export const RadarScores = IDL.Record({
+  'focus' : IDL.Float64,
+  'social' : IDL.Float64,
+  'learning' : IDL.Float64,
+  'work' : IDL.Float64,
+  'personal' : IDL.Float64,
+  'health' : IDL.Float64,
+});
+export const UserProfile = IDL.Record({
+  'xp' : IDL.Nat,
+  'streak' : IDL.Nat,
+  'username' : IDL.Text,
+  'radarScores' : RadarScores,
+  'level' : IDL.Nat,
+  'lastActive' : IDL.Int,
+});
+
+export const idlService = IDL.Service({
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addFocusSession' : IDL.Func([IDL.Nat, IDL.Nat], [FocusSession], []),
+  'addTask' : IDL.Func(
+      [IDL.Text, Category, Priority, IDL.Int, IDL.Nat],
+      [Task],
+      [],
+    ),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'deleteTask' : IDL.Func([IDL.Nat], [], []),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getFocusSessions' : IDL.Func([], [IDL.Vec(FocusSession)], []),
+  'getLeaderboard' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Principal, UserProfile))],
+      ['query'],
+    ),
+  'getTasks' : IDL.Func([], [IDL.Vec(Task)], []),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'updateTask' : IDL.Func([IDL.Nat, IDL.Bool], [Task], []),
+});
 
 export const idlInitArgs = [];
 
-export const idlFactory = ({ IDL }) => { return IDL.Service({}); };
+export const idlFactory = ({ IDL }) => {
+  const FocusSession = IDL.Record({
+    'completedAt' : IDL.Int,
+    'durationMinutes' : IDL.Nat,
+    'xpEarned' : IDL.Nat,
+  });
+  const Category = IDL.Variant({
+    'social' : IDL.Null,
+    'learning' : IDL.Null,
+    'work' : IDL.Null,
+    'personal' : IDL.Null,
+    'health' : IDL.Null,
+  });
+  const Priority = IDL.Variant({
+    'low' : IDL.Null,
+    'high' : IDL.Null,
+    'medium' : IDL.Null,
+  });
+  const Task = IDL.Record({
+    'title' : IDL.Text,
+    'xpReward' : IDL.Nat,
+    'completed' : IDL.Bool,
+    'dueDate' : IDL.Int,
+    'category' : Category,
+    'priority' : Priority,
+  });
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
+  const RadarScores = IDL.Record({
+    'focus' : IDL.Float64,
+    'social' : IDL.Float64,
+    'learning' : IDL.Float64,
+    'work' : IDL.Float64,
+    'personal' : IDL.Float64,
+    'health' : IDL.Float64,
+  });
+  const UserProfile = IDL.Record({
+    'xp' : IDL.Nat,
+    'streak' : IDL.Nat,
+    'username' : IDL.Text,
+    'radarScores' : RadarScores,
+    'level' : IDL.Nat,
+    'lastActive' : IDL.Int,
+  });
+  
+  return IDL.Service({
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addFocusSession' : IDL.Func([IDL.Nat, IDL.Nat], [FocusSession], []),
+    'addTask' : IDL.Func(
+        [IDL.Text, Category, Priority, IDL.Int, IDL.Nat],
+        [Task],
+        [],
+      ),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'deleteTask' : IDL.Func([IDL.Nat], [], []),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getFocusSessions' : IDL.Func([], [IDL.Vec(FocusSession)], []),
+    'getLeaderboard' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Principal, UserProfile))],
+        ['query'],
+      ),
+    'getTasks' : IDL.Func([], [IDL.Vec(Task)], []),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'updateTask' : IDL.Func([IDL.Nat, IDL.Bool], [Task], []),
+  });
+};
 
 export const init = ({ IDL }) => { return []; };

@@ -10,7 +10,62 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface _SERVICE {}
+export type Category = { 'social' : null } |
+  { 'learning' : null } |
+  { 'work' : null } |
+  { 'personal' : null } |
+  { 'health' : null };
+export interface FocusSession {
+  'completedAt' : bigint,
+  'durationMinutes' : bigint,
+  'xpEarned' : bigint,
+}
+export type Priority = { 'low' : null } |
+  { 'high' : null } |
+  { 'medium' : null };
+export interface RadarScores {
+  'focus' : number,
+  'social' : number,
+  'learning' : number,
+  'work' : number,
+  'personal' : number,
+  'health' : number,
+}
+export interface Task {
+  'title' : string,
+  'xpReward' : bigint,
+  'completed' : boolean,
+  'dueDate' : bigint,
+  'category' : Category,
+  'priority' : Priority,
+}
+export interface UserProfile {
+  'xp' : bigint,
+  'streak' : bigint,
+  'username' : string,
+  'radarScores' : RadarScores,
+  'level' : bigint,
+  'lastActive' : bigint,
+}
+export type UserRole = { 'admin' : null } |
+  { 'user' : null } |
+  { 'guest' : null };
+export interface _SERVICE {
+  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addFocusSession' : ActorMethod<[bigint, bigint], FocusSession>,
+  'addTask' : ActorMethod<[string, Category, Priority, bigint, bigint], Task>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'deleteTask' : ActorMethod<[bigint], undefined>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getFocusSessions' : ActorMethod<[], Array<FocusSession>>,
+  'getLeaderboard' : ActorMethod<[], Array<[Principal, UserProfile]>>,
+  'getTasks' : ActorMethod<[], Array<Task>>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'updateTask' : ActorMethod<[bigint, boolean], Task>,
+}
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];
 export declare const idlFactory: IDL.InterfaceFactory;

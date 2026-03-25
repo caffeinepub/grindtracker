@@ -1,11 +1,12 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Search, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { LogOut, Zap } from "lucide-react";
 import type { Page } from "../App";
-import { currentUser } from "../data/mockData";
+import { useApp } from "../context/AppContext";
+import { useInternetIdentity } from "../hooks/useInternetIdentity";
 
 const navLinks: { label: string; page: Page }[] = [
-  { label: "Home", page: "home" },
   { label: "Dashboard", page: "dashboard" },
   { label: "Tasks", page: "tasks" },
   { label: "Focus", page: "focus" },
@@ -22,6 +23,14 @@ export default function Navigation({
   currentPage,
   onNavigate,
 }: NavigationProps) {
+  const { clear } = useInternetIdentity();
+  const { profile } = useApp();
+
+  const username = profile?.username ?? "Grinder";
+  const xp = profile ? Number(profile.xp) : 0;
+  const level = profile ? Number(profile.level) : 1;
+  const initials = username.slice(0, 2).toUpperCase();
+
   return (
     <header
       className="sticky top-0 z-50 border-b border-border/50 backdrop-blur-xl"
@@ -31,7 +40,7 @@ export default function Navigation({
         {/* Logo */}
         <button
           type="button"
-          onClick={() => onNavigate("home")}
+          onClick={() => onNavigate("dashboard")}
           className="flex items-center gap-2 font-display font-bold text-xl tracking-tight"
           data-ocid="nav.link"
         >
@@ -61,37 +70,35 @@ export default function Navigation({
           ))}
         </nav>
 
-        {/* Right icons */}
+        {/* Right: user info + logout */}
         <div className="flex items-center gap-3 ml-auto">
-          <button
-            type="button"
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
-            data-ocid="nav.link"
-          >
-            <Search className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all relative"
-            data-ocid="nav.link"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-primary" />
-          </button>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full card-surface cursor-pointer">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full card-surface">
             <Avatar className="w-6 h-6">
               <AvatarFallback className="text-xs gradient-btn text-background font-bold">
-                {currentUser.avatar}
+                {initials}
               </AvatarFallback>
             </Avatar>
             <span className="text-sm font-medium hidden sm:block">
-              {currentUser.name.split(" ")[0]}
+              {username}
             </span>
             <Badge className="bg-primary/20 text-primary border-0 text-xs px-1.5">
               <Zap className="w-2.5 h-2.5 mr-0.5" />
-              {currentUser.xp.toLocaleString()}
+              Lv.{level}
             </Badge>
+            <span className="text-xs text-muted-foreground hidden sm:block">
+              {xp.toLocaleString()} XP
+            </span>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clear}
+            data-ocid="nav.button"
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 px-2"
+            title="Log out"
+          >
+            <LogOut className="w-4 h-4" />
+          </Button>
         </div>
       </div>
     </header>
